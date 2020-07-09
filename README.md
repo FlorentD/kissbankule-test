@@ -1,2 +1,0 @@
-# kissbankule-test
-Begin app
