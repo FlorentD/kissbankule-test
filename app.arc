@@ -5,7 +5,8 @@ begin-app
 folder build
 
 @http
-get /api
+get /graphql
+post /graphql
 
 @tables
 data
