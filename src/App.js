@@ -1,43 +1,71 @@
-/* global fetch */
-import React, { useState, useEffect } from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React from "react";
+import "./App.css";
+import { SupTitle } from "@kisskissbankbank/kitten/src/components/typography/sup-title";
+import { Container } from "@kisskissbankbank/kitten/src/components/grid/container";
+import { CrowdfundingCard } from "@kisskissbankbank/kitten/src/components/cards/crowdfunding-card";
+import COLORS from "@kisskissbankbank/kitten/src/constants/colors-config";
+import { useQuery } from "@apollo/react-hooks";
+import gql from "graphql-tag";
 
-const App = () => {
-  const [message, setMessage] = useState('...loading')
-
-  useEffect(() => {
-    async function fetchData () {
-      try {
-        let data = await (await fetch('/api')).json()
-        setMessage(data.message)
-      } catch (err) {
-        setMessage(err.message)
+const GET_PROJECTS = gql`
+  query {
+    getProjects {
+      id
+      name
+      image
+      fundingPercent
+      shortDesc
+      owner {
+        city
+        image
+        username
       }
     }
-    fetchData()
-  })
+  }
+`;
 
+const App = () => {
+  const { data, loading } = useQuery(GET_PROJECTS);
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>{message}</p>
-        <p>Change me!</p>
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Container>
+      <img src="/logo.jpg" alt="" />
+      <SupTitle>Make Good projets inspirants</SupTitle>
+      <div className="kbule_wrapper">
+        {loading
+          ? Array(16)
+              .fill(null)
+              .map(() => {
+                return <CrowdfundingCard loading className="kbule_card" />;
+              })
+          : data.getProjects.map((project) => {
+              return (
+                <CrowdfundingCard
+                  key={project.id}
+                  href={project.publicUrl}
+                  imageProps={{
+                    src: project.image,
+                    alt: "",
+                    backgroundColor: COLORS.line2,
+                    color: COLORS.font1,
+                    loading: "lazy",
+                  }}
+                  avatarProps={{
+                    src: project.owner.image,
+                    alt: "",
+                  }}
+                  ownerTitle={project.owner.username}
+                  ownerDescription={project.owner.city}
+                  cardTitle={project.name}
+                  cardSubTitle={project.shortDesc}
+                  progress={project.fundingPercent}
+                  className="kbule_card"
+                  stretch
+                />
+              );
+            })}
+      </div>
+    </Container>
   );
-}
+};
 
 export default App;
